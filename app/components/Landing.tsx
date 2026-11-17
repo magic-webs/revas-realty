@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const MANIFESTO =
   "Most cities grow by accident. Dholera is being drawn first — every road, duct, canal and park placed on a plan before the first resident arrives.";
@@ -64,348 +62,185 @@ export default function Landing() {
 
   useEffect(() => {
     const mm = gsap.matchMedia();
-    const ctx = gsap.context(() => {
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        // ---------- hero ----------
-        const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
-        tl.from(".hero-char", { yPercent: 115, rotate: 6, duration: 1.4, stagger: 0.06 })
-          .from(".hero-fade", { y: 24, opacity: 0, duration: 1, stagger: 0.12 }, "-=0.9")
-          .from(".plan-line", { strokeDashoffset: (_, el: SVGGeometryElement) => el.getTotalLength?.() ?? 1000, duration: 2.4, stagger: 0.08, ease: "power2.inOut" }, 0);
-
-        gsap.set(".plan-line", {
-          strokeDasharray: (_, el: SVGGeometryElement) => el.getTotalLength?.() ?? 1000,
-        });
-
-        gsap.to(".hero-plan", {
-          yPercent: 25, scale: 1.15, rotate: 8, ease: "none",
-          scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
-        });
-        gsap.to(".hero-title", {
-          yPercent: -18, opacity: 0.2, ease: "none",
-          scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
-        });
-
-        // ---------- manifesto word reveal ----------
-        gsap.fromTo(".m-word", { opacity: 0.12 }, {
-          opacity: 1, stagger: 0.1, ease: "none",
-          scrollTrigger: { trigger: ".manifesto", start: "top 70%", end: "bottom 60%", scrub: true },
-        });
-
-        // ---------- stats ----------
-        gsap.utils.toArray<HTMLElement>(".stat").forEach((el) => {
-          const num = el.querySelector<HTMLElement>(".stat-num")!;
-          const target = Number(num.dataset.n);
-          const pre = num.dataset.prefix ?? "";
-          const suf = num.dataset.suffix ?? "";
-          const o = { v: 0 };
-          gsap.from(el, { y: 60, opacity: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 88%" } });
-          gsap.to(o, {
-            v: target, duration: 2, ease: "power2.out",
-            scrollTrigger: { trigger: el, start: "top 88%" },
-            onUpdate: () => (num.textContent = pre + Math.round(o.v).toLocaleString("en-IN") + suf),
-          });
-        });
-
-        // ---------- headings ----------
-        gsap.utils.toArray<HTMLElement>(".reveal").forEach((el) => {
-          gsap.from(el, { y: 70, opacity: 0, duration: 1.1, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 85%" } });
-        });
-
-        // ---------- timeline ----------
-        gsap.fromTo(".tl-line", { scaleY: 0 }, {
-          scaleY: 1, ease: "none", transformOrigin: "top",
-          scrollTrigger: { trigger: ".timeline", start: "top 60%", end: "bottom 70%", scrub: true },
-        });
-        gsap.utils.toArray<HTMLElement>(".tl-item").forEach((el) => {
-          gsap.from(el, { x: -40, opacity: 0, duration: 0.9, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 80%" } });
-        });
-
-        // ---------- guide section ----------
-        gsap.fromTo(".guide", { clipPath: "inset(8% 6% round 48px)" }, {
-          clipPath: "inset(0% 0% round 0px)", ease: "none",
-          scrollTrigger: { trigger: ".guide", start: "top 95%", end: "top 20%", scrub: true },
-        });
-        gsap.from(".guide-card", {
-          y: 120, rotate: 10, opacity: 0, duration: 1.3, ease: "power4.out",
-          scrollTrigger: { trigger: ".guide", start: "top 45%" },
-        });
-        gsap.from(".chapter", {
-          x: 40, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out",
-          scrollTrigger: { trigger: ".chapters", start: "top 80%" },
-        });
-        gsap.to(".guide-card", {
-          yPercent: -8, rotate: -2, ease: "none",
-          scrollTrigger: { trigger: ".guide", start: "top 30%", end: "bottom top", scrub: true },
-        });
-
-        // ---------- footer ----------
-        gsap.from(".cta-word", {
-          yPercent: 110, stagger: 0.1, duration: 1.2, ease: "power4.out",
-          scrollTrigger: { trigger: ".cta", start: "top 70%" },
-        });
-      });
-
-      // horizontal pillars only on larger screens
-      mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
-        const track = document.querySelector<HTMLElement>(".h-track")!;
-        const dist = () => track.scrollWidth - window.innerWidth;
-        const tween = gsap.to(track, {
-          x: () => -dist(), ease: "none",
-          scrollTrigger: {
-            trigger: ".h-wrap", pin: true, scrub: 0.6, start: "top top",
-            end: () => "+=" + dist(), invalidateOnRefresh: true,
-          },
-        });
-        gsap.to(".h-progress", {
-          scaleX: 1, ease: "none", transformOrigin: "left",
-          scrollTrigger: { trigger: ".h-wrap", start: "top top", end: () => "+=" + dist(), scrub: true, invalidateOnRefresh: true },
-        });
-        gsap.utils.toArray<HTMLElement>(".pillar-no").forEach((el) => {
-          gsap.from(el, {
-            xPercent: 40, opacity: 0, ease: "none",
-            scrollTrigger: { trigger: el, containerAnimation: tween, start: "left 95%", end: "left 55%", scrub: true },
-          });
-        });
-      });
-
-      // magnetic download button
-      const btn = document.querySelector<HTMLElement>(".magnet");
-      if (btn && window.matchMedia("(hover: hover)").matches) {
-        const xTo = gsap.quickTo(btn, "x", { duration: 0.5, ease: "power3" });
-        const yTo = gsap.quickTo(btn, "y", { duration: 0.5, ease: "power3" });
-        const move = (e: MouseEvent) => {
-          const r = btn.getBoundingClientRect();
-          xTo((e.clientX - (r.left + r.width / 2)) * 0.25);
-          yTo((e.clientY - (r.top + r.height / 2)) * 0.35);
-        };
-        const leave = () => { xTo(0); yTo(0); };
-        btn.addEventListener("mousemove", move);
-        btn.addEventListener("mouseleave", leave);
-      }
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl.from(".hero-char", { yPercent: 110, duration: 1.1, stagger: 0.04 })
+        .from(".hero-fade", { y: 16, opacity: 0, duration: 0.7, stagger: 0.08 }, "-=0.6");
     }, root);
-
-    return () => {
-      mm.revert();
-      ctx.revert();
-    };
+    return () => mm.revert();
   }, []);
 
   return (
     <div ref={root} className="grain">
       {/* NAV */}
-      <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between px-6 py-5 mix-blend-difference md:px-10">
-        <a href="#top" className="font-mono text-xs uppercase tracking-[0.25em] text-white">
-          Revas <span className="opacity-60">Realty</span>
+      <header className="hero-header">
+        <a href="#top" className="hero-brand" aria-label="Revas Realty home">
+          <svg viewBox="0 0 24 26" aria-hidden="true"><path d="M3 22 13 5h9L12 22Z" fill="currentColor" /><path d="M13 5v9L8 22H0L10 5Z" fill="currentColor" opacity=".6" /></svg>
+          <span>Revas <span className="hero-brand-light">Realty</span></span>
         </a>
-        <nav className="flex items-center gap-6 font-mono text-[11px] uppercase tracking-[0.2em] text-white">
-          <a href="#about" className="hidden hover:opacity-60 sm:block">About</a>
-          <a href="#roadmap" className="hidden hover:opacity-60 sm:block">Roadmap</a>
-          <a href="#guide" className="border-b border-white pb-0.5">Guide ↓</a>
+        <nav className="hero-nav" aria-label="Main navigation">
+          <a href="#about">About</a>
+          <a href="#roadmap">Roadmap</a>
+          <a href="#guide">Guide <span aria-hidden="true">↗</span></a>
         </nav>
       </header>
 
+      <main>
       {/* HERO */}
-      <section id="top" className="hero relative flex min-h-[100svh] flex-col justify-end overflow-hidden px-6 pb-12 pt-32 md:px-10">
-        <svg
-          className="hero-plan pointer-events-none absolute -right-[20%] top-[-10%] h-[120%] w-[120%] md:right-[-5%] md:w-[75%]"
-          viewBox="0 0 800 800" fill="none" stroke="var(--saffron)" strokeWidth="1.2" opacity="0.55"
-        >
-          {[60, 130, 200, 270, 340].map((r) => (
-            <circle key={r} className="plan-line" cx="400" cy="400" r={r} />
-          ))}
-          {Array.from({ length: 12 }).map((_, i) => {
-            const a = (i * Math.PI) / 6;
-            return <line key={i} className="plan-line" x1={400 + Math.cos(a) * 60} y1={400 + Math.sin(a) * 60} x2={400 + Math.cos(a) * 340} y2={400 + Math.sin(a) * 340} />;
-          })}
-          <rect className="plan-line" x="40" y="40" width="720" height="720" strokeDasharray="4 8" />
-          <path className="plan-line" d="M0 620 C 200 560, 300 700, 520 640 S 760 600, 800 560" stroke="var(--moss)" />
-        </svg>
-
-        <div className="hero-fade relative mb-10 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.22em] text-bone/70">
-          <span className="inline-flex items-center gap-2"><i className="size-1.5 animate-pulse rounded-full bg-saffron" /> Gujarat, India</span>
-          <span>22.25°N · 72.20°E</span>
-          <span>Delhi–Mumbai Industrial Corridor</span>
+      <section id="top" className="hero" aria-labelledby="hero-heading">
+        <div className="hero-img">
+          <Image src="/dholera/airport-3.jpg" alt="Aerial view of the Dholera International Airport runway under construction" fill preload sizes="100vw" className="hero-photo" />
         </div>
+        <div className="hero-shade" aria-hidden="true" />
 
-        <h1 className="hero-title display relative text-[clamp(2.6rem,16.5vw,20rem)] font-light">
-          {"DHOLERA".split("").map((c, i) => (
-            <span key={i} className="inline-block overflow-hidden align-bottom pb-[0.06em]">
-              <span className="hero-char inline-block origin-bottom-left">{c}</span>
+        <div className="hero-content">
+          <div className="hero-fade hero-location">
+            <span className="hero-place">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a8 8 0 0 0-8 8c0 5.5 8 12 8 12s8-6.5 8-12a8 8 0 0 0-8-8Zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z" /></svg>
+              Gujarat, India
             </span>
-          ))}
-        </h1>
+            <span className="hero-coordinates">22.25°N | 72.20°E</span>
+            <span className="hero-corridor">Delhi–Mumbai Industrial Corridor</span>
+          </div>
 
-        <div className="relative mt-8 grid items-end gap-8 md:grid-cols-[1.2fr_1fr]">
-          <p className="hero-fade max-w-xl text-lg leading-relaxed text-bone/80 md:text-xl">
-            A smart city being built <em className="display not-italic text-saffron">from a blank map</em> — and a
+          <h1 id="hero-heading" className="hero-title" aria-label="Dholera">
+            {"DHOLERA".split("").map((c, i) => (
+              <span key={i} className="hero-letter" aria-hidden="true">
+                <span className="hero-char">{c}</span>
+              </span>
+            ))}
+          </h1>
+          <div className="hero-fade hero-rule" aria-hidden="true" />
+          <p className="hero-fade hero-description">
+            A smart city being built <em>from a blank map</em> — and a
             plain-spoken guide to buying land in it, without the hype.
           </p>
-          <div className="hero-fade flex flex-wrap gap-3 md:justify-end [&>a]:flex-1 [&>a]:text-center md:[&>a]:flex-none">
-            <a href="#guide" className="rounded-full bg-saffron px-7 py-4 text-sm font-semibold text-ink transition hover:bg-bone">
-              Get the investment guide
+
+          <ul className="hero-fade hero-features">
+            <li>
+              <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <path d="M3 36h34M6 35V19l7-4v20m0 0V7l7-4 6 4v28m0-20 7 4v16M18 10v4m4-4v4m-4 4v4m4-4v4m-4 4v9m4-9v9M9 21v3m0 4v3m21-10v3m0 4v3" />
+              </svg>
+              <span>India&apos;s First<br />Greenfield Smart City</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                <path d="m4 37 10-34m12 0 10 34M20 3v5m0 5v6m0 6v8" />
+              </svg>
+              <span>DMIC<br />Connectivity</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <path d="M3 36h34M6 35V25h5v10m6 0V19h5v16m6 0V12h5v23M5 20l10-9 7 3L34 3m-7 0h7v7" />
+              </svg>
+              <span>Long-Term<br />Growth Potential</span>
+            </li>
+          </ul>
+
+          <div className="hero-fade hero-actions">
+            <a href="#guide" className="hero-button hero-button-primary">
+              Get the Investment Guide <span aria-hidden="true">⟶</span>
             </a>
-            <a href="#about" className="rounded-full border border-bone/30 px-7 py-4 text-sm transition hover:border-bone">
-              Explore Dholera
-            </a>
+            <a href="#about" className="hero-button hero-button-secondary">Explore Dholera</a>
           </div>
         </div>
       </section>
 
-      {/* MARQUEE */}
-      <div className="overflow-hidden border-y border-bone/15 bg-saffron py-4 text-ink">
-        <div className="marquee flex w-max gap-10 whitespace-nowrap font-mono text-sm uppercase tracking-[0.2em]">
-          {Array.from({ length: 2 }).map((_, k) => (
-            <div key={k} className="flex gap-10" aria-hidden={k === 1}>
-              {["Greenfield smart city", "Special Investment Region", "Expressway to Ahmedabad", "Semiconductor anchor", "Town Planning Schemes", "Gulf of Khambhat"].map((t) => (
-                <span key={t}>{t} <span className="mx-4">✦</span></span>
-              ))}
-            </div>
-          ))}
-        </div>
+      <div className="region-strip">
+        <span>Gujarat’s next chapter</span>
+        <span>Planned infrastructure</span>
+        <span>Connected to opportunity</span>
+        <a href="#ground">See the land <span aria-hidden="true">↗</span></a>
       </div>
 
-      {/* MANIFESTO */}
-      <section id="about" className="manifesto px-6 py-28 md:px-10 md:py-56">
-        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-saffron">( About Dholera )</p>
-        <p className="display mt-10 max-w-6xl text-[clamp(1.9rem,6vw,5.8rem)] font-light !leading-[1.02]">
-          {MANIFESTO.split(" ").map((w, i) => (
-            <span key={i} className="m-word inline-block pr-[0.25em]">{w}</span>
-          ))}
-        </p>
-      </section>
-
-      {/* STATS */}
-      <section className="px-6 pb-24 md:px-10 md:pb-40">
-        <div className="grid border-t border-bone/20 sm:grid-cols-2 lg:grid-cols-4">
+      <section id="about" className="section-shell about-section" aria-labelledby="about-heading">
+        <div className="section-heading">
+          <div><p className="section-label">About Dholera</p><h2 id="about-heading">A city imagined.<br />A future taking shape.</h2></div>
+          <div className="about-copy"><p>{MANIFESTO}</p><a className="text-link" href="#roadmap">Follow the roadmap <span aria-hidden="true">↗</span></a></div>
+        </div>
+        <div className="stats-grid">
           {STATS.map((s) => (
-            <div key={s.label} className="stat border-b border-bone/20 py-12 sm:pr-8 lg:border-r lg:last:border-r-0">
-              <div
-                className="stat-num display text-5xl text-saffron sm:text-6xl md:text-7xl"
-                data-n={s.n} data-suffix={s.suffix} data-prefix={s.prefix ?? ""}
-              >
-                {(s.prefix ?? "") + s.n.toLocaleString("en-IN") + s.suffix}
-              </div>
-              <p className="mt-4 max-w-[16ch] font-mono text-[11px] uppercase leading-relaxed tracking-[0.18em] text-bone/60">{s.label}</p>
+            <div key={s.label} className="stat">
+              <p className="stat-value">{s.prefix ?? ""}{s.n.toLocaleString("en-IN")}<span>{s.suffix}</span></p>
+              <p className="stat-label">{s.label}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* PILLARS — horizontal scroll */}
-      <section className="h-wrap relative bg-ink-2 md:h-screen md:overflow-hidden">
-        <div className="px-6 pt-24 md:absolute md:left-10 md:top-10 md:z-10 md:p-0">
-          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-saffron">( Why it matters )</p>
+      <section id="ground" className="section-shell ground-section" aria-labelledby="ground-heading">
+        <div className="section-heading">
+          <div><p className="section-label">On the ground</p><h2 id="ground-heading">The plan. The land.<br />The bigger picture.</h2></div>
+          <p className="section-intro">Look beyond the master plan. Explore the region’s infrastructure, open landscapes and the work already taking shape.</p>
         </div>
-        <div className="h-track flex flex-col md:h-full md:w-max md:flex-row md:items-center">
-          <div className="reveal flex flex-col justify-center px-6 py-16 md:h-full md:w-[60vw] md:px-10 md:py-0">
-            <h2 className="display text-[clamp(2.8rem,8vw,8rem)] font-light">
-              Five reasons <br /> the map <br /> is <em className="text-saffron">moving.</em>
-            </h2>
-          </div>
-          {PILLARS.map((p) => (
-            <article key={p.no} className="relative flex flex-col justify-end border-t border-bone/15 px-6 py-14 md:h-[70vh] md:w-[42vw] md:border-l md:border-t-0 md:px-12 md:py-12">
-              <span className="pillar-no display absolute right-6 top-6 text-[8rem] text-bone/[0.06] md:text-[14rem]">{p.no}</span>
-              <h3 className="display relative text-4xl font-light md:text-6xl">{p.title}</h3>
-              <p className="relative mt-5 max-w-md text-base leading-relaxed text-bone/70 md:text-lg">{p.body}</p>
-            </article>
-          ))}
-          <div className="hidden md:block md:w-[20vw]" />
+        <div className="land-gallery">
+          <figure className="land-map">
+            <div className="gallery-image"><Image src="/dholera/landuse.jpg" alt="Proposed land-use plan of Dholera Special Investment Region" fill sizes="(min-width: 900px) 38vw, 90vw" className="object-contain" /></div>
+            <figcaption><span>The master plan</span><span>Land use & zoning</span></figcaption>
+          </figure>
+          <figure className="land-airport">
+            <div className="gallery-image"><Image src="/dholera/airport-1.jpg" alt="Dholera International Airport construction in progress" fill sizes="(min-width: 900px) 52vw, 90vw" className="object-cover" /></div>
+            <figcaption><span>A new gateway</span><span>Airport · Phase 1 works</span></figcaption>
+          </figure>
+          <figure className="land-wetland">
+            <div className="gallery-image"><Image src="/dholera/wetland.jpg" alt="Painted storks in the Bhal wetlands near Dholera" fill sizes="(min-width: 900px) 28vw, 90vw" className="object-cover" /></div>
+            <figcaption><span>Room to breathe</span><span>Bhal wetlands</span></figcaption>
+          </figure>
+          <figure className="land-road">
+            <div className="gallery-image"><Image src="/dholera/sign.jpg" alt="Road sign showing distances to Dholera and Ahmedabad" fill sizes="(min-width: 900px) 22vw, 90vw" className="object-cover" /></div>
+            <figcaption><span>The road ahead</span><span>Ahmedabad connection</span></figcaption>
+          </figure>
         </div>
-        <div className="absolute inset-x-10 bottom-8 hidden h-px bg-bone/15 md:block">
-          <div className="h-progress h-full origin-left scale-x-0 bg-saffron" />
-        </div>
+        <p className="image-credit">Images: Wikimedia Commons · CC BY-SA 3.0/4.0, CC BY 3.0 · Respective authors.</p>
       </section>
 
-      {/* ROADMAP */}
-      <section id="roadmap" className="timeline px-6 py-24 md:px-10 md:py-40">
-        <div className="grid gap-16 md:grid-cols-[1fr_1.4fr]">
-          <div className="md:sticky md:top-32 md:self-start">
-            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-saffron">( Roadmap )</p>
-            <h2 className="display reveal mt-6 text-[clamp(2.8rem,6vw,6rem)] font-light">
-              From notification <br /> to <em className="text-saffron">neighbourhood.</em>
-            </h2>
-            <p className="reveal mt-6 max-w-sm text-bone/65">
-              Large projects move slowly. Treat every date as a plan, not a promise, and confirm progress with official sources.
-            </p>
-          </div>
-          <div className="relative pl-10">
-            <div className="absolute left-0 top-0 h-full w-px bg-bone/15" />
-            <div className="tl-line absolute left-0 top-0 h-full w-px bg-saffron" />
-            {TIMELINE.map((t, i) => (
-              <div key={i} className="tl-item relative pb-20 last:pb-0">
-                <i className="absolute -left-[46px] top-2 size-3 rounded-full border-2 border-saffron bg-ink" />
-                <span className="font-mono text-xs uppercase tracking-[0.2em] text-saffron">{t.y}</span>
-                <h3 className="display mt-2 text-3xl font-light md:text-5xl">{t.t}</h3>
-                <p className="mt-3 max-w-lg text-bone/65">{t.d}</p>
-              </div>
+      <section className="pillars-section" aria-labelledby="pillars-heading">
+        <div className="section-shell pillars-layout">
+          <div className="pillars-heading"><p className="section-label">Built with intent</p><h2 id="pillars-heading">What makes<br />the plan different.</h2><p className="section-intro">A closer look at the foundations of a city designed from the ground up.</p><a className="text-link" href="#guide">Understand before you invest <span aria-hidden="true">↗</span></a></div>
+          <div className="pillar-list">
+            {PILLARS.map((p, i) => (
+              <details className="pillar-detail" key={p.no} open={i === 0}>
+                <summary><h3>{p.title}</h3><span className="detail-toggle" aria-hidden="true">+</span></summary>
+                <p>{p.body}</p>
+              </details>
             ))}
           </div>
         </div>
       </section>
 
-      {/* INVESTMENT GUIDE */}
-      <section id="guide" className="guide relative bg-bone px-6 py-24 text-ink md:px-10 md:py-44">
-        <div className="grid items-center gap-20 lg:grid-cols-2">
-          <div className="guide-card relative mx-auto w-full max-w-md">
-            <div className="aspect-[3/4] rotate-[-3deg] overflow-hidden rounded-sm bg-ink p-8 text-bone shadow-[0_40px_80px_-20px_rgba(0,0,0,0.5)]">
-              <svg className="absolute -bottom-10 -right-10 w-[110%] opacity-40" viewBox="0 0 400 400" fill="none" stroke="var(--saffron)" strokeWidth="1">
-                {[40, 80, 120, 160, 200].map((r) => <circle key={r} cx="200" cy="200" r={r} />)}
-              </svg>
-              <div className="relative flex h-full flex-col justify-between">
-                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-saffron">Revas Realty · Free guide</p>
-                <div>
-                  <h3 className="display text-6xl font-light">Dholera <br /> Plot <br /> Buyer&apos;s <br /> Guide</h3>
-                  <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-bone/60">PDF · 2 pages · Edition 2026</p>
-                </div>
-              </div>
-            </div>
-          </div>
+      <section id="roadmap" className="section-shell roadmap-section" aria-labelledby="roadmap-heading">
+        <div className="roadmap-heading"><p className="section-label">The roadmap</p><h2 id="roadmap-heading">From a vision<br />to a neighbourhood.</h2><p className="section-intro">A city is built in chapters. Here’s how the plan is unfolding.</p><div className="roadmap-note">Every date is a plan, not a promise. Confirm project progress with official sources before making a decision.</div></div>
+        <ol className="roadmap-list">
+          {TIMELINE.map((t, i) => (
+            <li key={t.t} className={i < 2 ? "milestone milestone-past" : "milestone"}>
+              <span className="milestone-dot" aria-hidden="true" /><span className="milestone-date">{t.y === "Next" ? "Next chapter" : t.y}</span>
+              <h3>{t.t}</h3><p>{t.d}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
 
-          <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-clay">( Investment guide )</p>
-            <h2 className="display reveal mt-6 text-[clamp(2.8rem,6vw,6rem)] font-light">
-              Read this <br /> <em className="text-clay">before</em> you <br /> pay a token.
-            </h2>
-            <p className="reveal mt-6 max-w-lg text-lg text-ink/70">
-              A short, honest primer: what to check, what to ask, and what to walk away from. No guaranteed-return claims, no sign-up wall.
-            </p>
-            <ul className="chapters mt-8 border-t border-ink/20">
-              {CHAPTERS.map((c, i) => (
-                <li key={c} className="chapter flex gap-5 border-b border-ink/20 py-4">
-                  <span className="font-mono text-xs text-clay">0{i + 1}</span>
-                  <span className="text-base md:text-lg">{c}</span>
-                </li>
-              ))}
-            </ul>
-            <a
-              href="/downloads/Dholera-Investment-Guide.pdf"
-              download="Dholera-Investment-Guide.pdf"
-              className="magnet group mt-10 inline-flex max-w-full items-center gap-4 rounded-full bg-ink py-3 pl-8 pr-3 text-bone transition hover:bg-clay"
-            >
-              <span className="font-semibold">Download the free guide</span>
-              <span className="grid size-12 place-items-center rounded-full bg-saffron text-xl text-ink transition group-hover:rotate-[135deg]">↓</span>
-            </a>
+      <section id="guide" className="guide-section" aria-labelledby="guide-heading">
+        <div className="section-shell guide-layout">
+          <div className="guide-book">
+            <Image src="/dholera/airport-3.jpg" alt="" fill sizes="(min-width: 900px) 32vw, 80vw" className="object-cover" />
+            <div className="book-shade" />
+            <div className="book-content"><span className="book-brand">Revas Realty</span><div><p className="section-label">A little clarity goes a long way.</p><h3>Dholera<br />Plot Buyer’s<br />Guide</h3></div><div className="book-bottom"><span>2026 edition</span><span>Free PDF · 2 pages</span></div></div>
+          </div>
+          <div className="guide-copy">
+            <p className="section-label">The investment guide</p><h2 id="guide-heading">Your first step.<br />A better understanding.</h2>
+            <p className="section-intro">Before you pay a token, know what to check, what to ask and when to walk away. A short, honest guide with no sign-up wall.</p>
+            <ul className="guide-chapters">{CHAPTERS.map((c) => <li key={c}><span aria-hidden="true">✓</span>{c}</li>)}</ul>
+            <a href="/downloads/Dholera-Investment-Guide.pdf" download="Dholera-Investment-Guide.pdf" className="hero-button hero-button-primary guide-download">Download the free guide <span aria-hidden="true">↓</span></a>
+            <p className="download-note">Yours to keep. No email required.</p>
           </div>
         </div>
       </section>
+      </main>
 
-      {/* CTA / FOOTER */}
-      <footer className="cta px-6 pb-10 pt-28 md:px-10 md:pt-40">
-        <h2 className="display text-[clamp(2.8rem,13vw,12rem)] font-light">
-          {["Walk the", "plan first."].map((line) => (
-            <span key={line} className="block overflow-hidden pb-[0.08em]">
-              <span className="cta-word block">{line}</span>
-            </span>
-          ))}
-        </h2>
-        <div className="mt-16 flex flex-col justify-between gap-8 border-t border-bone/20 pt-8 md:flex-row">
-          <a href="#top" className="font-mono text-xs uppercase tracking-[0.25em] text-saffron">↑ Back to top</a>
-          <p className="max-w-2xl text-xs leading-relaxed text-bone/50">
-            Disclaimer: Information is for general awareness only and is not financial, legal or tax advice. It does not promise
-            any return. Property values can fall as well as rise, and project timelines change. Verify details with official
-            sources (such as DICDL) and a qualified advocate before investing. © 2026 Revas Realty.
-          </p>
-        </div>
+      <footer className="section-shell site-footer">
+        <div className="footer-top"><div><p className="section-label">Revas Realty</p><h2>Walk the plan first.</h2></div><a href="#top" className="back-top">Back to top <span aria-hidden="true">↑</span></a></div>
+        <div className="footer-bottom"><p>© 2026 Revas Realty.<br />Perspective before property.</p><p>Information is for general awareness, not financial, legal or tax advice. Returns are not guaranteed. Property values and project timelines can change. Verify details with official sources and a qualified advocate before investing.</p><nav aria-label="Footer navigation"><a href="#about">About</a><a href="#roadmap">Roadmap</a><a href="#guide">The guide</a></nav></div>
       </footer>
     </div>
   );
