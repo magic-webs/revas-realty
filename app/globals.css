@@ -208,6 +208,15 @@ main h2, .site-footer h2 { font-family: "Bodoni 72", "Bodoni MT", Didot, "Times 
 .guide-chapters li span { color: var(--saffron); }
 .guide-download { margin-top: 30px; font-size: 16px; min-height: 58px; }
 .download-note { color: var(--muted); font-size: 12px; margin-top: 14px; }
+.download-note a { color: var(--saffron); text-decoration: underline; text-underline-offset: 3px; }
+.lead-form { display: grid; gap: 14px; margin-top: 30px; max-width: 440px; }
+.lead-form label { display: grid; gap: 6px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.lead-form input { min-height: 52px; padding: 0 20px; border-radius: 100px; border: 1px solid rgb(244 237 211 / .35); background: rgb(244 237 211 / .06); color: inherit; font-size: 16px; text-transform: none; letter-spacing: 0; }
+.lead-form input:focus-visible { outline: 3px solid #efa820; outline-offset: 3px; }
+.lead-form .guide-download { margin-top: 8px; width: 100%; }
+.lead-form button:disabled { opacity: .6; cursor: wait; }
+.lead-error { color: #ff9b7a; font-size: 14px; }
+.lead-success { margin-top: 30px; padding: 18px 24px; border-radius: 20px; border: 1px solid var(--saffron); color: var(--saffron); }
 .site-footer { padding-block: 72px 28px; }
 .footer-top { display: flex; align-items: center; justify-content: space-between; gap: 30px; padding-bottom: 50px; }
 .site-footer h2 { font-size: clamp(38px, 5vw, 76px); }

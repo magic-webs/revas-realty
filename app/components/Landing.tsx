@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import gsap from "gsap";
+import GuideLeadForm from "./GuideLeadForm";
 
 const MANIFESTO =
   "Most cities grow by accident. Dholera is being drawn first — every road, duct, canal and park placed on a plan before the first resident arrives.";
@@ -229,10 +230,9 @@ export default function Landing() {
           </div>
           <div className="guide-copy">
             <p className="section-label">The investment guide</p><h2 id="guide-heading">Your first step.<br />A better understanding.</h2>
-            <p className="section-intro">Before you pay a token, know what to check, what to ask and when to walk away. A short, honest guide with no sign-up wall.</p>
+            <p className="section-intro">Before you pay a token, know what to check, what to ask and when to walk away. A short, honest guide.</p>
             <ul className="guide-chapters">{CHAPTERS.map((c) => <li key={c}><span aria-hidden="true">✓</span>{c}</li>)}</ul>
-            <a href="/downloads/Dholera-Investment-Guide.pdf" download="Dholera-Investment-Guide.pdf" className="hero-button hero-button-primary guide-download">Download the free guide <span aria-hidden="true">↓</span></a>
-            <p className="download-note">Yours to keep. No email required.</p>
+            <GuideLeadForm />
           </div>
         </div>
       </section>
